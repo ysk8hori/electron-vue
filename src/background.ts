@@ -10,11 +10,26 @@ import {
 } from 'electron';
 import { createProtocol } from 'vue-cli-plugin-electron-builder/lib';
 import installExtension, { VUEJS_DEVTOOLS } from 'electron-devtools-installer';
+import * as fs from 'fs';
 const isDevelopment = process.env.NODE_ENV !== 'production';
 
-ipcMain.handle('click', (event: IpcMainInvokeEvent, ...args: any[]) => {
-  args.forEach(console.log);
-});
+ipcMain.handle(
+  'loadfile',
+  (event: Electron.IpcMainInvokeEvent, ...args: any[]) =>
+    new Promise((resolve, reject) => {
+      fs.access(args[0], fs.constants.F_OK, (err) => {
+        console.log(`${args[0]} ${err ? 'does not exist' : 'exists'}`);
+        if (err) reject(`${args[0]} ${err ? 'does not exist' : 'exists'}`);
+      });
+      fs.readFile(
+        `./${args[0]}`,
+        (err: NodeJS.ErrnoException | null, data: Buffer) => {
+          if (err) return reject(err);
+          resolve(data.toString());
+        }
+      );
+    })
+);
 
 // Keep a global reference of the window object, if you don't, the window will
 // be closed automatically when the JavaScript object is garbage collected.
