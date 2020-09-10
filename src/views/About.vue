@@ -21,8 +21,10 @@ export default Vue.extend({
     change(text: string) {
       console.log(text);
       try {
-        require('electron')
-          .ipcRenderer.invoke('click', this.message)
+        const { ipcRenderer } = window.require('electron');
+        // window.Electron.
+        ipcRenderer
+          .invoke('click', this.message)
           .then((_: any) => console.log(_))
           .catch((e: any) => console.warn(e));
       } catch (e) {
