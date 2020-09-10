@@ -19,15 +19,27 @@ ipcMain.handle(
     new Promise((resolve, reject) => {
       fs.access(args[0], fs.constants.F_OK, (err) => {
         console.log(`${args[0]} ${err ? 'does not exist' : 'exists'}`);
-        if (err) reject(`${args[0]} ${err ? 'does not exist' : 'exists'}`);
-      });
-      fs.readFile(
-        `./${args[0]}`,
-        (err: NodeJS.ErrnoException | null, data: Buffer) => {
-          if (err) return reject(err);
-          resolve(data.toString());
+
+        if (err) {
+          // err時はディレクトリ情報を返す
+          fs.readdir(
+            './',
+            'utf-8',
+            (err: NodeJS.ErrnoException | null, files: string[] | Buffer[]) => {
+              console.log(files);
+              resolve(files.join('\n'));
+            }
+          );
+        } else {
+          fs.readFile(
+            `./${args[0]}`,
+            (err: NodeJS.ErrnoException | null, data: Buffer) => {
+              if (err) return reject(err);
+              resolve(data.toString());
+            }
+          );
         }
-      );
+      });
     })
 );
 
